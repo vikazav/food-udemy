@@ -222,9 +222,16 @@ function postData (form) {
 
         const r = new XMLHttpRequest();
         r.open('POST', 'server.php');
+        r.setRequestHeader('Content-type', 'applicatopn/json', 'charset = utf-8');
         const formData = new FormData(form);
-        //r.setRequestHeader('Content-type', 'mbltipart/form-data');
-        r.send(formData);
+        const object = {};
+        formData.forEach(function(value, key) {
+            object[key] = value;
+        });
+        const json = JSON.stringify(object);
+               
+        r.send(json);
+        
         r.addEventListener('load', () => {
             if (r.status === 200) {
                 console.log(r.response);
