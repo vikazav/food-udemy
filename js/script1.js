@@ -223,30 +223,29 @@ function postData (form) {
         `;
         //form.append(statusMessage);
         form.insertAdjacentElement('afterend', statusMessage);
-
-        const r = new XMLHttpRequest();
-        r.open('POST', 'server.php');
-        r.setRequestHeader('Content-type', 'applicatopn/json', 'charset = utf-8');
+       
         const formData = new FormData(form);
-        const object = {};
-        formData.forEach(function(value, key) {
-            object[key] = value;
-        });
-        const json = JSON.stringify(object);
+        // const object = {};
+        // formData.forEach(function(value, key) {
+        //     object[key] = value;
+        // });
+        // const json = JSON.stringify(object);
                
-        r.send(json);
-        
-        r.addEventListener('load', () => {
-            if (r.status === 200) {
-                console.log(r.response);
+        fetch('server.php', {
+            method: 'POST',
+            // headers: {'Content-type':'application/json'},
+            body: formData
+            }).then(data =>data.text())
+            .then(data =>{
+                console.log(data);
                 showThanksModal(message.success);
                 statusMessage.remove();
-                form.reset();
-                 
-              } else {
+            }).catch(()=>{
                 showThanksModal(message.failure);
-            }
-        });
+            }).finally(()=>{
+                form.reset(); 
+            });
+  
     });
 }
 
