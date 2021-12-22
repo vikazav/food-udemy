@@ -288,3 +288,49 @@ fetch('http://localhost:3000/menu')
 
 
 });
+
+// SLIDER
+const slides = document.querySelectorAll('.offer__slide');
+const sliderPrev = document.querySelector('.offer__slider-prev');
+const sliderNext = document.querySelector('.offer__slider-next');
+const current = document.querySelector('#current');
+const total = document.querySelector('#total');
+let index = 1;
+
+showSlide(index);   
+
+if ( slides.length <10) {
+ total.textContent = `0${slides.length}`;
+    } else {
+        total.textContent = slides.length;
+    }
+    
+
+function showSlide(n) {
+    if ( n > slides.length ) {
+        index = 1;
+    }
+    if ( n < 1 ) {
+        index = slides.length;
+    }
+    slides.forEach ((item) => item.style.display = 'none');
+    slides[index -1].style.display = 'block';
+
+    if (slides.length <10) {
+        current.textContent = `0${index}`;
+           } else {
+               current.textContent = index;
+           }   
+   }
+function plusSlides(n) {
+    showSlide(index+=n);
+}
+
+ sliderPrev.addEventListener('click', function(){
+    plusSlides(-1);
+});
+ sliderNext.addEventListener('click', function(){
+    plusSlides(1);
+   });
+
+
