@@ -290,12 +290,19 @@ fetch('http://localhost:3000/menu')
 
 
 // SLIDER
-const slides = document.querySelectorAll('.offer__slide');
-const sliderPrev = document.querySelector('.offer__slider-prev');
-const sliderNext = document.querySelector('.offer__slider-next');
-const current = document.querySelector('#current');
-const total = document.querySelector('#total');
+let offset = 0;
 let index = 1;
+const slides = document.querySelectorAll('.offer__slide'),
+        sliderPrev = document.querySelector('.offer__slider-prev'),
+        sliderNext = document.querySelector('.offer__slider-next'),
+        current = document.querySelector('#current'),
+        total = document.querySelector('#total'),
+        sliderField = document.querySelector('.offer__slider-innner'),
+        slider = document.querySelector('.offer__slider'),
+        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+        width =  window.getComputedStyle(slidesWrapper).width;
+
+
 
 // showSlide(index);   
 
@@ -334,18 +341,16 @@ let index = 1;
 //    });
 
 // SLIDER CAROUSEL
-const sliderField = document.querySelector('.offer__slider-innner'),
-        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
-        width =  window.getComputedStyle(slidesWrapper).width; //беремо стилі які дав css після рендеру сторінки
-        let offset = 0;
+//беремо стилі які дав css після рендеру сторінки
+        
 
-        if ( slides.length < 10) {
-            total.textContent = `0${slides.length}`;
-            current.textContent = `0${index}`;
-               } else {
-                   total.textContent = slides.length;
-                   current.textContent = index;
-               }
+ if ( slides.length < 10) {
+    total.textContent = `0${slides.length}`;
+    current.textContent = `0${index}`;
+ } else {
+        total.textContent = slides.length;
+        current.textContent = index;
+  }
 
 slidesWrapper.style.overflow = 'hidden';
 sliderField.style.width = 100 * slides.length + '%';
@@ -355,6 +360,51 @@ sliderField.style.display = 'flex';
 slides.forEach (slide => {
     slide.style.width = width;
 });
+
+ 
+slider.style.position = 'relative';
+const indicators = document.createElement('ol'),
+        dots =[];
+indicators.classList.add('carousel-indicators');
+indicators.style.cssText = `
+position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 15;
+    display: flex;
+    justify-content: center;
+    margin-right: 15%;
+    margin-left: 15%;
+    list-style: none;`;
+slider.append(indicators);
+
+    for (let i = 0; i < slides.length; i++) {
+        const dot = document.createElement('li');
+        dot.setAttribute('data-slide-to',i+1);
+        
+        dot.style.cssText = `
+        box-sizing: content-box;
+        flex: 0 1 auto;
+        width: 30px;
+        height: 6px;
+        margin-right: 3px;
+        margin-left: 3px;
+        cursor: pointer;
+        background-color: #fff;
+        background-clip: padding-box;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        opacity: .5;
+        transition: opacity .6s ease;
+        `;
+        if (i==0) {
+            dot.style.opacity = 1;
+        }
+    indicators.append(dot);
+    dots.push(dot);
+   }
+       
 
 sliderNext.addEventListener ('click',() => {
             if (offset == (+width.slice(0,width.length-2) * (slides.length-1))) {
@@ -374,6 +424,8 @@ sliderNext.addEventListener ('click',() => {
            } else {
                 current.textContent = index;
                 }
+         dots.forEach (dot => dot.style.opacity = '0.5');
+         dots[index-1].style.opacity = 1;      
 });
 
 sliderPrev.addEventListener ('click',() => {
@@ -394,10 +446,31 @@ if ( slides.length <10) {
    } else {
         current.textContent = index;
         }
+dots.forEach (dot => dot.style.opacity = '0.5');
+        dots[index-1].style.opacity = 1;     
 
     });
 
+dots.forEach(dot => {
+    dot.addEventListener('click',(e) => {
+        const slideTo = e.target.getAttribute('data-slide-to');
+        index = slideTo;
+        offset = +width.slice(0,width.length-2) * (slideTo -1);
+        sliderField.style.transform = `translateX(-${offset}px)`;
 
+        if (slides.length < 10) {
+            current.textContent =  `0${index}`;
+        } else {
+            current.textContent =  index;
+        }
+
+        dots.forEach(dot => dot.style.opacity = ".5");
+        dots[index-1].style.opacity = 1;
+    });
+
+});
+
+    
 
 
 
