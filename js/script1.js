@@ -342,7 +342,7 @@ const slides = document.querySelectorAll('.offer__slide'),
 
 // SLIDER CAROUSEL
 //беремо стилі які дав css після рендеру сторінки
-        
+      
 
  if ( slides.length < 10) {
     total.textContent = `0${slides.length}`;
@@ -360,7 +360,13 @@ sliderField.style.display = 'flex';
 slides.forEach (slide => {
     slide.style.width = width;
 });
-
+function addZero() {
+    if ( slides.length <10) {
+        current.textContent = `0${index}`;
+     } else {
+          current.textContent = index;
+          }
+}
  
 slider.style.position = 'relative';
 const indicators = document.createElement('ol'),
@@ -404,13 +410,20 @@ slider.append(indicators);
     indicators.append(dot);
     dots.push(dot);
    }
-       
+   function deleteNotDigits(str) {
+    return  +str.replace(/\D/g, '');
+  }
+  function dotOpacity() {
+    dots.forEach(dot => dot.style.opacity = ".5");
+    dots[index-1].style.opacity = 1;
+  }
+ 
 
 sliderNext.addEventListener ('click',() => {
-            if (offset == (+width.slice(0,width.length-2) * (slides.length-1))) {
+            if (offset == deleteNotDigits(width) * (slides.length-1)) {
         offset = 0;
             } else {
-                offset +=  +width.slice(0,width.length-2);
+                offset += deleteNotDigits(width);
             }
         sliderField.style.transform = `translateX(-${offset}px)`;
 
@@ -419,20 +432,16 @@ sliderNext.addEventListener ('click',() => {
             } else {
                 index ++;
             }
-        if ( slides.length <10) {
-              current.textContent = `0${index}`;
-           } else {
-                current.textContent = index;
-                }
-         dots.forEach (dot => dot.style.opacity = '0.5');
-         dots[index-1].style.opacity = 1;      
+            addZero();//виклик
+        
+         dotOpacity();   
 });
 
 sliderPrev.addEventListener ('click',() => {
     if (offset == 0) {
-offset = +width.slice(0,width.length-2) * (slides.length -1);
+offset = deleteNotDigits(width) * (slides.length -1);
     } else {
-        offset -=  +width.slice(0,width.length-2);
+        offset -=  deleteNotDigits(width);
     }
 sliderField.style.transform = `translateX(-${offset}px`;
 
@@ -441,13 +450,9 @@ if ( index == 1) {
     } else {
         index --;
     }
-if ( slides.length <10) {
-      current.textContent = `0${index}`;
-   } else {
-        current.textContent = index;
-        }
-dots.forEach (dot => dot.style.opacity = '0.5');
-        dots[index-1].style.opacity = 1;     
+    addZero();//виклик
+
+    dotOpacity();    
 
     });
 
@@ -455,26 +460,115 @@ dots.forEach(dot => {
     dot.addEventListener('click',(e) => {
         const slideTo = e.target.getAttribute('data-slide-to');
         index = slideTo;
-        offset = +width.slice(0,width.length-2) * (slideTo -1);
+        offset = deleteNotDigits(width) * (slideTo -1);
         sliderField.style.transform = `translateX(-${offset}px)`;
+    addZero();//виклик
+       
 
-        if (slides.length < 10) {
-            current.textContent =  `0${index}`;
-        } else {
-            current.textContent =  index;
-        }
-
-        dots.forEach(dot => dot.style.opacity = ".5");
-        dots[index-1].style.opacity = 1;
+    dotOpacity();   
     });
 
 });
 
+   
+// CALC
+
+let result = document.querySelector('.calculating__result span');
+let sex = 'female', height, weight, age, ratio = 1.375;
+if (localStorage.getItem('ratio')) {
+    ratio = localStorage.getItem('ratio');
     
 
+} else {
+    ratio='1.375';
+    localStorage.setItem('ratio',1.375);
 
+}
+if (localStorage.getItem('sex')) {
+    sex = localStorage.getItem('sex');
+  
+} else {
+    sex='female';
+    localStorage.setItem('sex','female');
+}
 
+function initLocalSettinds(selector, activeClass) {
+const elements = document.querySelectorAll('.calculating__choose-item');
+elements.forEach(elem =>{
+elem.classList.remove();
+if (elem.getAttribute('id') === localStorage.getItem( 'sex') ) {
+    elem.classList.add(activeClass);
+}
+if (elem.getAttribute('data-ratio') === localStorage.getItem( 'ratio') ) {
+    elem.classList.add(activeClass);
+}
+});
+}
+initLocalSettinds('#gender div', 'calculating__choose-item_active');
+initLocalSettinds('.calculating__choose_bigv div','calculating__choose-item_active');
 
+function calc () {
+    if (!sex || !height || !weight || !ratio) {
+       result.textContent = "____";
+       return;
+     }
+     if (sex ==='female') {
+        result.textContent =Math.round((447.6 + (9.2 * weight) + (3.1 *height) - (4.3 * age)) * ratio);
+     } else {
+        result.textContent =Math.round((88.36 + (13.4 * weight) + (4.8 *height) - (5.7 *age)) * ratio);
+     }
+}
+calc();
+
+function getStaticDate(selector, activeClass) {
+    const elements = document.querySelectorAll(selector);
+    elements.forEach(elem =>{
+    elem.addEventListener('click',(e) => {
+        if (e.target.getAttribute('data-ratio')) {
+            ratio = +e.target.getAttribute('data-ratio');
+            localStorage.setItem('ratio', e.target.getAttribute('data-ratio') );
+        } else {
+            sex = e.target.getAttribute('id');
+            localStorage.setItem('sex', e.target.getAttribute('id'));
+        }
+        elements.forEach(elem =>{
+            elem.classList.remove(activeClass);
+        });
+            e.target.classList.add(activeClass);
+            calc();
+    });
+    });
+}
+
+getStaticDate('#gender div', 'calculating__choose-item_active');
+getStaticDate('.calculating__choose_big div','calculating__choose-item_active');
+
+function getDynamicDate(selector) {
+const input = document.querySelector(selector);
+input.addEventListener('input',() => {
+  if (input.value.match(/\D/g )) {
+      input.style.border = '1px solid red';
+    } else {
+        input.style.border = 'none';
+switch(input.getAttribute('id')) {
+    case "height":
+        height = +input.value;
+        break;
+    case "weight":
+        weight = +input.value;
+        break;
+    case "age":
+        age = +input.value;
+        break;
+    }
+}
+calc();
+});
+}
+
+getDynamicDate('#height');
+getDynamicDate('#weight');
+getDynamicDate('#age');
 
 
 
